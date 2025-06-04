@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/
+.env
+.DS_Store
+db.sqlite3 # if using sqlite for development, you might want to ignore it
+media/ # User-uploaded files
+
+# FastAPI specific
+*.log
+instance/
+.webassets-cache
+
+# General
+node_modules/ # If you have any frontend parts in the backend project
+.idea/ # PyCharm
+.vscode/ # VS Code
+*.swp # Vim
+*.swo
