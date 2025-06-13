@@ -29,6 +29,13 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
+    recruiter_profile = relationship(
+        "RecruiterProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
+
     # uselist=False indique une relation one-to-one du point de vue de User
     # cascade="all, delete-orphan" : si un User est supprimé, son CandidateProfile associé l'est aussi.
     def __repr__(self):

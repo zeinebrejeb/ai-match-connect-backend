@@ -8,7 +8,8 @@ from app.crud.crud_job_posting import skills_string_to_list
 from app.models.recruiter_profile import RecruiterProfile 
 from app.dependencies.deps import get_current_active_recruiter 
 
-router = APIRouter()
+
+router = APIRouter(prefix="/job-postings", tags=["Job Postings"])
 
 def enrich_job_posting_read(db_job_posting: Any) -> JobPostingRead:
     """
@@ -32,12 +33,6 @@ async def create_job_posting(
     job_posting_in: JobPostingCreate,
     current_recruiter: RecruiterProfile = Depends(get_current_active_recruiter),
 ) -> JobPostingRead:
-    """
-    Create a new job posting.
-
-    - **job_posting_in**: Job posting data to create.
-    - Requires authentication as an active recruiter.
-    """
     if not current_recruiter: 
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -62,11 +57,7 @@ async def read_job_posting(
     *,
     db: AsyncSession = Depends(get_db),
     job_posting_id: int,
-
 ) -> JobPostingRead:
-    """
-    Get a job posting by ID.
-    """
     db_job_posting = await crud_job_posting.get(db=db, id=job_posting_id)
     if not db_job_posting:
         raise HTTPException(
@@ -85,11 +76,7 @@ async def read_job_postings(
     db: AsyncSession = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    
 ) -> List[JobPostingRead]:
-    """
-    Retrieve all job postings with pagination.
-    """
     db_job_postings = await crud_job_posting.get_multi(db=db, skip=skip, limit=limit)
     return [enrich_job_posting_read(jp) for jp in db_job_postings]
 
@@ -107,9 +94,6 @@ async def read_job_postings_by_current_recruiter(
     skip: int = 0,
     limit: int = 100,
 ) -> List[JobPostingRead]:
-    """
-    Retrieve job postings for the currently authenticated recruiter.
-    """
     if not current_recruiter:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -136,11 +120,6 @@ async def update_job_posting(
     job_posting_in: JobPostingUpdate,
     current_recruiter: RecruiterProfile = Depends(get_current_active_recruiter),
 ) -> JobPostingRead:
-    """
-    Update a job posting.
-
-    - Only the recruiter who created the job posting can update it.
-    """
     db_job_posting = await crud_job_posting.get(db=db, id=job_posting_id)
     if not db_job_posting:
         raise HTTPException(
@@ -170,12 +149,6 @@ async def delete_job_posting(
     job_posting_id: int,
     current_recruiter: RecruiterProfile = Depends(get_current_active_recruiter),
 ) -> None:
-    """
-    Delete a job posting.
-
-    - Only the recruiter who created the job posting can delete it.
-    - Returns 204 No Content on successful deletion.
-    """
     db_job_posting = await crud_job_posting.get(db=db, id=job_posting_id)
     if not db_job_posting:
         raise HTTPException(
@@ -188,5 +161,4 @@ async def delete_job_posting(
         )
 
     await crud_job_posting.remove(db=db, id=job_posting_id)
-    return None 
-
+    return None

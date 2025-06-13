@@ -3,7 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from app.models.job_posting import JobType, ExperienceLevel
 
-
 class JobPostingBase(BaseModel):
     """Base schema for Job Posting data."""
     title: str
@@ -37,3 +36,9 @@ class JobPostingRead(JobPostingBase):
     created_at: datetime
     updated_at: datetime
     skills: List[str] = []
+    
+class JobPostingListResponse(BaseModel):
+    items: List[JobPostingRead]
+    total: int
+    page: Optional[int] = None 
+    size: Optional[int] = None

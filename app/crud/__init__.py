@@ -13,6 +13,5 @@ from .crud_recruiter_profile import recruiter_profile
 from .crud_education import education
 from .crud_experience import experience 
 from .crud_skill import candidate_skill 
-from .crud_job_posting import job_posting 
 from .crud_job_posting import skills_string_to_list 
-
+from .crud_job_posting import job_posting as job

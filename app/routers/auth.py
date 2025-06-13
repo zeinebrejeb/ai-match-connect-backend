@@ -7,6 +7,7 @@ from app import crud, schemas
 from app.core import security
 from app.core.config import settings
 from app.dependencies import deps
+from fastapi import Header
 
 router = APIRouter(
     prefix="/auth",
@@ -64,6 +65,40 @@ async def login_for_access_token(
         "token_type": "bearer",
         "refresh_token": refresh_token}
 
+@router.post("/token/refresh", response_model=schemas.Token)
+async def refresh_access_token(
+    refresh_token: str = Header(..., alias="Authorization"),
+    db: AsyncSession = Depends(deps.get_db)
+) -> Any:
+    """
+    Refresh access token using refresh token.
+    """
+    if not refresh_token.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Invalid refresh token header.")
+    
+    token = refresh_token.split(" ")[1]
+
+    try:
+        payload = security.decode_token(token, verify_exp=True)
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid refresh token.")
+
+    email = payload.get("sub")
+    if not email:
+        raise HTTPException(status_code=401, detail="Invalid token payload.")
+
+    user = await crud.get_user_by_email(db, email=email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    new_access_token = security.create_access_token(
+        subject=email,
+        expires_delta=access_token_expires,
+        role=user.role.value if user.role else "user"
+    )
+
+    return {"access_token": new_access_token, "token_type": "bearer"}
 @router.get("/test-auth", response_model=schemas.User)
 async def test_auth(
     current_user: schemas.User = Depends(deps.get_current_active_user) 

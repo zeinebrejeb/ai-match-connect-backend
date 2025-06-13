@@ -9,16 +9,14 @@ def skills_list_to_string(skills: List[str]) -> str:
     """Converts a list of skill strings into a single string for storage."""
     return ", ".join(skill.strip() for skill in skills if skill.strip()) 
 
-# Helper function to convert a string of skills back to a list
 def skills_string_to_list(skills_string: Optional[str]) -> List[str]:
     """Converts a string of skills (e.g., comma-separated) back into a list."""
     if not skills_string:
         return []
-    # Split by comma and space, strip whitespace from each item
     return [skill.strip() for skill in skills_string.split(',') if skill.strip()]
 
 
-# Create a specific CRUD class for JobPosting, inheriting from CRUDBase
+
 class CRUDJobPosting(CRUDBase[JobPosting, JobPostingCreate, JobPostingUpdate]):
 
     async def get_by_recruiter_profile_id(
@@ -44,7 +42,7 @@ class CRUDJobPosting(CRUDBase[JobPosting, JobPostingCreate, JobPostingUpdate]):
         Creates a new job posting linked to a recruiter profile.
         Handles conversion of skills list to string.
         """
-        # Convert Pydantic schema to dictionary, excluding unset fields
+
         create_data = obj_in.model_dump(exclude_unset=True) 
 
         # Convert the list of skills to the string format for the model
@@ -62,7 +60,7 @@ class CRUDJobPosting(CRUDBase[JobPosting, JobPostingCreate, JobPostingUpdate]):
         await db.refresh(db_obj)
         return db_obj
 
-    async def update( # Override the base update to handle skills conversion
+    async def update(
         self,
         db: AsyncSession,
         *,
@@ -76,22 +74,22 @@ class CRUDJobPosting(CRUDBase[JobPosting, JobPostingCreate, JobPostingUpdate]):
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
-            # Convert Pydantic schema to dictionary, excluding unset fields
-            update_data = obj_in.model_dump(exclude_unset=True) # Use model_dump for Pydantic v2+
+            
+            update_data = obj_in.model_dump(exclude_unset=True) 
 
-        # Handle the 'skills' field specifically if it's in the update data
+
         if "skills" in update_data:
-            skills_list = update_data.pop("skills") # Get the list of skills
-            if skills_list is not None: # Check if skills were explicitly provided (could be None for Optional)
-                update_data["required_skills"] = skills_list_to_string(skills_list) # Convert and add to update data
+            skills_list = update_data.pop("skills") 
+            if skills_list is not None:
+                update_data["required_skills"] = skills_list_to_string(skills_list) 
             else:
-                 # If skills was explicitly set to None in the schema, set required_skills to None/empty string
-                 update_data["required_skills"] = None # Or "" depending on how you want to represent empty skills
+                 
+                 update_data["required_skills"] = None 
 
 
-        # Apply updates to the db_obj using the modified update_data
+        
         for field, value in update_data.items():
-             if hasattr(db_obj, field): # Check if the model has the attribute
+             if hasattr(db_obj, field): 
                 setattr(db_obj, field, value)
 
         db.add(db_obj) 
@@ -101,5 +99,5 @@ class CRUDJobPosting(CRUDBase[JobPosting, JobPostingCreate, JobPostingUpdate]):
 
 job_posting = CRUDJobPosting(JobPosting)
 
-#now use job_posting.get, job_posting.get_multi, job_posting.get_by_recruiter_profile_id,
+#job_posting.get, job_posting.get_multi, job_posting.get_by_recruiter_profile_id,
 # job_posting.create_with_recruiter_profile, job_posting.update, job_posting.remove
