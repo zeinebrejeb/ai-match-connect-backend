@@ -17,3 +17,6 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: Optional[str] = None 
     roles: Optional[List[str]] = [] 
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str

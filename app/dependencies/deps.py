@@ -43,15 +43,15 @@ async def get_current_user(
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
-        email: Optional[str] = payload.get("sub")
-        if email is None:
+        user_id: Optional[str] = payload.get("sub")
+        if user_id is None:
             raise credentials_exception
-        token_data = TokenData(email=email)
+
 
     except (JWTError, AttributeError):
         raise credentials_exception
 
-    user = await crud_user.get_user_by_email(db, email=token_data.email)
+    user = await crud_user.get_user_by_id(db, id=int(user_id))
 
     if user is None:
         raise credentials_exception
@@ -82,7 +82,7 @@ async def get_current_active_superuser(
         )
     return current_user
 
-async def get_current_active_recruiter(
+async def get_current_active_recruiter( 
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db)
 ) -> RecruiterProfile:

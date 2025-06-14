@@ -23,12 +23,11 @@ class User(Base):
     
 
     candidate_profile = relationship(
-        "CandidateProfile", 
-        back_populates="user", 
-        uselist=False, 
+        "CandidateProfile",
+        back_populates="user",
+        uselist=False,
         cascade="all, delete-orphan"
     )
-
     recruiter_profile = relationship(
         "RecruiterProfile",
         back_populates="user",

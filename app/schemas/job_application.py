@@ -2,6 +2,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Optional
 from datetime import datetime
 from app.models.job_application import ApplicationStatus
+from app.schemas.job_posting import JobPostingRead 
+from app.schemas.candidate_profile import CandidateProfileRead
 
 class JobApplicationBase(BaseModel):
     """Base Pydantic schema for job application data."""
@@ -34,8 +36,9 @@ class JobApplicationRead(JobApplicationBase):
 
 
 class JobApplicationReadDetailed(JobApplicationRead):
-    from app.schemas.job_posting import JobPostingRead 
-    from app.schemas.candidate_profile import CandidateProfileRead
-
+    """
+    Schema for reading a single, detailed Job Application, including the
+    nested job posting and candidate profile information.
+    """
     job_posting: JobPostingRead
     candidate: CandidateProfileRead

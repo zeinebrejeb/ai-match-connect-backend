@@ -3,6 +3,8 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from app.database.database import Base
+from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy import ForeignKey
 
 class ApplicationStatus(enum.Enum):
     """Enumeration for the status of a job application."""
@@ -33,7 +35,9 @@ class JobApplication(Base):
     
     status = Column(Enum(ApplicationStatus), default=ApplicationStatus.PENDING, nullable=False)
     applied_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    
+
+    job_posting_id: Mapped[int] = mapped_column(ForeignKey("job_postings.id"))
     job_posting = relationship("JobPosting", back_populates="applications")
-    candidate = relationship("CandidateProfile", back_populates="applications")
+    candidate_profile = relationship("CandidateProfile", back_populates="applications")
+
 

@@ -8,6 +8,7 @@ from app.core import security
 from app.core.config import settings
 from app.dependencies import deps
 from fastapi import Header
+from app.schemas.token import RefreshTokenRequest 
 
 router = APIRouter(
     prefix="/auth",
@@ -51,7 +52,7 @@ async def login_for_access_token(
     user_role = user.role.value if user.role  else "user"
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        subject=user.email,
+        subject=user.id,
         expires_delta=access_token_expires,
         role=user_role
     )
@@ -67,16 +68,13 @@ async def login_for_access_token(
 
 @router.post("/token/refresh", response_model=schemas.Token)
 async def refresh_access_token(
-    refresh_token: str = Header(..., alias="Authorization"),
+    token_request: RefreshTokenRequest, 
     db: AsyncSession = Depends(deps.get_db)
 ) -> Any:
     """
-    Refresh access token using refresh token.
+    Refresh access token using a refresh token from the request body.
     """
-    if not refresh_token.lower().startswith("bearer "):
-        raise HTTPException(status_code=401, detail="Invalid refresh token header.")
-    
-    token = refresh_token.split(" ")[1]
+    token = token_request.refresh_token
 
     try:
         payload = security.decode_token(token, verify_exp=True)
@@ -93,7 +91,7 @@ async def refresh_access_token(
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     new_access_token = security.create_access_token(
-        subject=email,
+        subject=user.id,
         expires_delta=access_token_expires,
         role=user.role.value if user.role else "user"
     )

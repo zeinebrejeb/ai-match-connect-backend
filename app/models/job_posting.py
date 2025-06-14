@@ -3,7 +3,9 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, func
 from sqlalchemy.orm import relationship
 from app.database.database import Base 
 from app.models.recruiter_profile import RecruiterProfile 
-
+from typing import List
+from sqlalchemy.orm import Mapped, relationship
+from app.models.job_application import JobApplication
 class JobType(str, enum.Enum):
     """Enum for job types."""
     full_time = "full-time"
@@ -39,9 +41,11 @@ class JobPosting(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
-    # Define the relationship back to the RecruiterProfile model
     recruiter_profile = relationship("RecruiterProfile", back_populates="job_postings")
-
+    applications: Mapped[List["JobApplication"]] = relationship(
+        back_populates="job_posting",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<JobPosting(id={self.id}, title='{self.title}', recruiter_profile_id={self.recruiter_profile_id})>"

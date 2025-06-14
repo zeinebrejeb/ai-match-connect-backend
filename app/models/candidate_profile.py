@@ -23,6 +23,10 @@ class CandidateProfile(Base):
     educations = relationship("Education", back_populates="candidate_profile", cascade="all, delete-orphan")
     candidate_skills = relationship("CandidateSkill", back_populates="candidate_profile", cascade="all, delete-orphan")
 
-
+    applications = relationship(
+        "JobApplication", 
+        back_populates="candidate_profile", 
+        cascade="all, delete-orphan"
+    )
     def __repr__(self):
         return f"<CandidateProfile(id={self.id}, user_id={self.user_id})>"
